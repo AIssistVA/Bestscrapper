@@ -1,45 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 import { connectDB } from '@/lib/db'
 import Lead from '@/models/Lead'
 import puppeteer from 'puppeteer'
 import * as cheerio from 'cheerio'
 
-// Middleware to verify JWT token
-async function verifyToken(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null
-  }
-
-  const token = authHeader.substring(7)
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any
-    return decoded
-  } catch (error) {
-    return null
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     const { industry, locationRadius } = await request.json()
 
     await connectDB()
 
     // Start scraping process
-    const scrapedLeads = await scrapeLeads(industry, locationRadius, user.userId)
+    const scrapedLeads = await scrapeLeads(industry, locationRadius)
 
     return NextResponse.json({
       message: 'Scraping completed successfully',
@@ -55,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function scrapeLeads(industry: string, locationRadius: number, userId: string) {
+async function scrapeLeads(industry: string, locationRadius: number) {
   const leads: any[] = []
   
   try {
@@ -84,7 +56,7 @@ async function scrapeLeads(industry: string, locationRadius: number, userId: str
     await browser.close()
 
     // Process and save leads
-    const processedLeads = await processAndSaveLeads(leads, userId)
+    const processedLeads = await processAndSaveLeads(leads)
 
     return processedLeads
   } catch (error) {
@@ -250,7 +222,7 @@ async function enrichLeadData(basicData: any, industry: string) {
   return lead
 }
 
-async function processAndSaveLeads(leads: any[], userId: string) {
+async function processAndSaveLeads(leads: any[]) {
   const processedLeads = []
 
   for (const leadData of leads) {
@@ -259,7 +231,6 @@ async function processAndSaveLeads(leads: any[], userId: string) {
       const existingLead = await Lead.findOne({
         businessName: leadData.businessName,
         email: leadData.email,
-        userId: userId
       })
 
       if (existingLead) {
@@ -268,7 +239,6 @@ async function processAndSaveLeads(leads: any[], userId: string) {
 
       // Calculate lead score
       leadData.leadScore = calculateLeadScore(leadData)
-      leadData.userId = userId
 
       // Save to database
       const lead = new Lead(leadData)

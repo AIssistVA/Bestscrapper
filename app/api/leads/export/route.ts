@@ -1,39 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 import { connectDB } from '@/lib/db'
 import Lead from '@/models/Lead'
 import { google } from 'googleapis'
 import { createObjectCsvWriter } from 'csv-writer'
 
-// Middleware to verify JWT token
-async function verifyToken(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null
-  }
-
-  const token = authHeader.substring(7)
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any
-    return decoded
-  } catch (error) {
-    return null
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     const { format, leads } = await request.json()
 
     if (format === 'csv') {

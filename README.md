@@ -10,6 +10,7 @@ A comprehensive web application for scraping and managing B2B leads in the Kansa
 - **Data Validation**: Built-in validation and duplicate detection
 - **Export Options**: CSV and Google Sheets export functionality
 - **Search & Filter**: Advanced filtering by industry, location, employee count, and revenue
+- **No Authentication Required**: Simple, direct access to all features
 
 ### Target Criteria
 - **Business Size**: 10-50 employees
@@ -31,7 +32,6 @@ A comprehensive web application for scraping and managing B2B leads in the Kansa
 - **Styling**: Tailwind CSS, Headless UI
 - **Backend**: Node.js, Next.js API Routes
 - **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT with bcrypt
 - **Web Scraping**: Puppeteer, Cheerio
 - **Export**: Google Sheets API, CSV generation
 - **Deployment**: Vercel-ready
@@ -64,7 +64,6 @@ cp .env.local.example .env.local
 Edit `.env.local` with your configuration:
 ```env
 MONGODB_URI=mongodb://localhost:27017/kc-lead-scraper
-JWT_SECRET=your-super-secret-jwt-key-here
 GOOGLE_SHEETS_CREDENTIALS={"your-google-service-account-json"}
 ```
 
@@ -87,9 +86,7 @@ The application will be available at `http://localhost:3000`
 
 ## 📖 Usage Guide
 
-### Authentication
-1. Register a new account or login with existing credentials
-2. The application uses JWT tokens for secure authentication
+
 
 ### Lead Management
 1. **View Leads**: Access the dashboard to see all scraped leads
@@ -156,7 +153,6 @@ const sources = [
 ### Environment Variables for Production
 ```env
 MONGODB_URI=your-production-mongodb-uri
-JWT_SECRET=your-production-jwt-secret
 GOOGLE_SHEETS_CREDENTIALS=your-production-google-credentials
 NEXTAUTH_URL=https://your-domain.vercel.app
 ```
@@ -170,8 +166,6 @@ For production, use MongoDB Atlas or another cloud MongoDB provider:
 
 ## 🔒 Security Features
 
-- **Password Hashing**: bcrypt with salt rounds
-- **JWT Authentication**: Secure token-based auth
 - **Input Validation**: Server-side validation for all inputs
 - **Rate Limiting**: Built-in protection against abuse
 - **CORS Protection**: Configured for security

@@ -1,37 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 import { connectDB } from '@/lib/db'
 import Lead from '@/models/Lead'
 
-// Middleware to verify JWT token
-async function verifyToken(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null
-  }
-
-  const token = authHeader.substring(7)
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any
-    return decoded
-  } catch (error) {
-    return null
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     await connectDB()
 
     const { searchParams } = new URL(request.url)
@@ -44,7 +16,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
 
     // Build query
-    const query: any = { userId: user.userId }
+    const query: any = {}
 
     if (industry) {
       query.industry = { $regex: industry, $options: 'i' }
@@ -85,21 +57,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
     await connectDB()
     
     const leadData = await request.json()
-    
-    // Add user ID to lead data
-    leadData.userId = user.userId
     
     // Calculate lead score based on various factors
     leadData.leadScore = calculateLeadScore(leadData)

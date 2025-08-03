@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
 import DashboardHeader from '@/components/DashboardHeader'
 import LeadSearchForm from '@/components/LeadSearchForm'
 import LeadTable from '@/components/LeadTable'
@@ -11,8 +9,6 @@ import ScrapingForm from '@/components/ScrapingForm'
 import { Lead } from '@/types/lead'
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
   const [leads, setLeads] = useState<Lead[]>([])
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -26,16 +22,8 @@ export default function DashboardPage() {
   })
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    }
-  }, [user, loading, router])
-
-  useEffect(() => {
-    if (user) {
-      fetchLeads()
-    }
-  }, [user])
+    fetchLeads()
+  }, [])
 
   useEffect(() => {
     filterLeads()
@@ -44,11 +32,7 @@ export default function DashboardPage() {
   const fetchLeads = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/leads', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      })
+      const response = await fetch('/api/leads')
       
       if (response.ok) {
         const data = await response.json()
@@ -93,7 +77,6 @@ export default function DashboardPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({
           format,
@@ -123,24 +106,9 @@ export default function DashboardPage() {
     fetchLeads()
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={user} />
+      <DashboardHeader />
       
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

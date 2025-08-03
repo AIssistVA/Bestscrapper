@@ -109,11 +109,6 @@ const leadSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
 })
 
 // Indexes for faster queries
@@ -123,7 +118,6 @@ leadSchema.index({ city: 1 })
 leadSchema.index({ employeeCount: 1 })
 leadSchema.index({ revenue: 1 })
 leadSchema.index({ leadScore: 1 })
-leadSchema.index({ userId: 1 })
 leadSchema.index({ scrapedAt: -1 })
 
 // Compound indexes for common queries
